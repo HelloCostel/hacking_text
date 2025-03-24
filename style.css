@@ -55,6 +55,7 @@ main {
 .text-generator {
     width: 90%;
     flex: 0.8;
+    padding: 1rem;
     border: 1px solid #272727;
     color:greenyellow;
 }
