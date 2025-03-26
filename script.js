@@ -3,57 +3,65 @@ const textGenerator = document.querySelector('.text-generator');
 const textInput = document.querySelector('.text-input');
 const button = document.querySelector('.button');
 
-//define animation settings
+//define symbols
 const symbols = ['!', '"', '£', '$', '%', '&', '(', ')', '*', '+', ',', '-', '.', '/', ':', ';', '<', '=', '>', '?', '@', '[', ']', '^', '_', '`', '{', '|', '}', '~'];
-const symbolsLength = symbols.length;
-
-/*UNTIL THE END OF TIME, CARACTHERS WILL CHANGE ONE AT TIME IN A SYMBOL.
-THEN WILL CHANGE ONE AT TIME IN THE PROPER LETTER.*/
 
 //define animation function
 const handleClick = () => {
-    //create an array of the string to iterate each letter
-    const inputString = textInput.value;
-    const lettersArray = inputString.split('');
-
-    //array of symbols to display in DOM
+    //create an array from the input string
+    const stringArray = textInput.value.split('');
+    
+    //create the crypted string to display in DOM
     const cryptedArray = [];
-    const setCryptedArray = () => {
-        for (let i = 0; i < lettersArray.length; i++) {
-            cryptedArray.push(symbols[Math.floor(Math.random() * symbolsLength)]);
+    const setCryptedArray = (array) => {
+        for (const letter of array) {
+            cryptedArray.push(symbols[Math.floor(Math.random() * symbols.length)]);
         }
-        console.log('first array: ' + cryptedArray);
+        //display the string
+        console.log('cryptedArray: ' + cryptedArray.join(''));
         textGenerator.innerHTML = cryptedArray.join('');
     }
-    setCryptedArray();
+    setCryptedArray(stringArray);
 
-    //animate the symbols string
+    //function to set animations delay
+    const delaySpeed = 20;
     const delay = (ms) => {
         return new Promise(resolve => setTimeout(resolve, ms));
     }
-    async function processArray(array) {
-        for (const letter of lettersArray) {
+
+    //manage the animation process:
+        //arrayOne      --> array that needs to be changed;
+        //arrayTwo      --> array containing characthers to replace;
+        //isRandomIndex --> choose whether to shuffle the characters to be replaced;
+    const processArray = async (arrayOne, arrayTwo, isRandomIndex) => {
+        for (const letter of arrayOne) {
             //index of current letter
-            const index = lettersArray.indexOf(letter);
-            //add random symbol at proper index instead of current letter
-            const symbolIndex = Math.floor(Math.random() * symbolsLength);
-            const cryptedLetter = symbols[symbolIndex];
-            cryptedArray[index] = cryptedLetter;
-            console.log('new array: ' + cryptedArray);
-            //display the new string
-            textGenerator.innerHTML = cryptedArray.join('');
-            //await N ms to iterate
-            await delay(1000); 
+            const index = arrayOne.indexOf(letter);
+            //Change the characters at proper index
+            if (isRandomIndex) {
+                const randomIndex = Math.floor(Math.random() * arrayTwo.length);
+                arrayOne[index] = arrayTwo[randomIndex];
+            } else {
+                arrayOne[index] = arrayTwo[index];
+            }
+            //display the mnew string
+            console.log('new string: ' + arrayOne)
+            textGenerator.innerHTML = arrayOne.join('');
+            //set delay between iterations
+            await delay(delaySpeed);
         }
     }
-
-    processArray(lettersArray);
-
-
-    const stopInterval = () => {
-        clearInterval(animationInterval);
+    //repeat the animation x amount of times
+    const repeatAnimation = async () => {
+        for (let i = 0; i < 2; i++) {
+            processArray(cryptedArray, symbols, true);
+            await delay(cryptedArray.length * delaySpeed); //wait the end of current animation to repeat
+        }
+        //display proper letters
+        processArray(cryptedArray, stringArray, false);
     }
-    
-};
+    repeatAnimation();
+}
 
 button.addEventListener('click', handleClick);
+
